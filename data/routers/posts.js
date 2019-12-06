@@ -1,9 +1,12 @@
 const express = require("express");
 const posts = require("../db.js");
+const commentsRouter = require("./comments");
 
-const router = express.Router({
-  mergeParams: true
-});
+const router = express.Router();
+router.use("/:id/comments", commentsRouter);
+// const router = express.Router({
+//   mergeParams: true
+// });
 
 // * Get all posts
 
