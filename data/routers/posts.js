@@ -1,61 +1,135 @@
-// const express = require("express");
-// const commentsRouter = require("./comments");
-// const posts = require("../db.js");
+const express = require("express");
+const posts = require("../db.js");
 
-// const router = express.Router();
+const router = express.Router({
+  mergeParams: true
+});
 
-// router.use("/api/posts");
+// * Get all posts
 
-// app.put("/api/users/:id", async (req, res) => {
-//     try {
-//        const userId = Number(req.params.id);
-//        let user = await db.findById(userId);
-//        if (!user) {
-//           return res.status(404).json({ message: "The user with the specified ID does not exist." });
-//        }
-//        if (!req.body.name || !req.body.bio) {
-//           return res.status(400).json({ errorMessage: "Please provide name and bio for the user." });
-//        }
-//        const result = await db.update(userId, req.body);
-//        // console.log(`Num Files updated: ${result}`);
+router.get("/", (req, res) => {
+  posts
+    .find()
+    .then(data => {
+      return res.status(200).json(data);
+    })
+    .catch(() => {
+      res
+        .status(500)
+        .json({ error: "The posts information could not be retrieved." });
+    });
+});
 
-//        user = await db.findById(userId);
-//        res.status(200).json(user);
-//     } catch (err) {
-//        console.err(err);
-//        res.status(500).json({ errorMessage: "The user information could not be modified." });
-//     }
-//  });
+// * Get by id
 
-// router.get("/", async (req, res) => {
-//   try {
-//     const result = await posts.find();
-//     res.status(200).json(result);
-//   } catch (err) {
-//     res.status(500).json("Not found");
-//   }
-// });
+router.get("/:id", (req, res) => {
+  const id = req.params.id;
+  posts
+    .findById(id)
+    .then(data => {
+      console.log("get by id", data);
+      if (!data) {
+        return res
+          .status(404)
+          .json({ message: "The post with the specified ID does not exist." });
+      } else {
+        return res.status(200).send(data);
+      }
+    })
+    .catch(error => {
+      res
+        .status(500)
+        .json({ error: "The post information could not be retrieved." });
+    });
+});
 
-// router.post("/", async (req, res) => {
-//   const newPost = {
-//     title: "",
-//     contents: ""
-//   };
-//   try {
-//     if (!res.body.title || !req.body.contents) {
-//       return res.status(400).json({
-//         errorMessage: "Please provide title and contents for the post."
-//       });
-//     }
-//     const result = await posts.insert(newPost);
-//     res.status(201).json(result);
-//   } catch (err) {
-//     res
-//       .status(500)
-//       .json({
-//         error: "There was an error while saving the post to the database"
-//       });
-//   }
-// });
+// * Create POST
 
-// module.exports = router;
+router.post("/", (req, res) => {
+  const newPost = {
+    title: req.body.title,
+    contents: req.body.contents
+  };
+
+  if (!req.body.title || !req.body.contents) {
+    return res.status(400).json({
+      errorMessage: "Please provide title and contents for the post."
+    });
+  }
+
+  posts
+    .insert(newPost)
+    .then(data => {
+      console.log(data, "data");
+      if (req.body.title && req.body.contents) {
+        return res.status(201).send(newPost);
+      }
+    })
+    .catch(error => {
+      res.status(500).json({
+        errorMessage: "There was an error while saving the post to the database"
+      });
+    });
+});
+
+// * Delete Post
+
+router.delete("/:id", (req, res) => {
+  const id = req.params.id;
+
+  posts.findById(id).then(data => {
+    console.log(data);
+    if (!data) {
+      res
+        .status(404)
+        .json({ message: "The post with the specified ID does not exist." });
+    }
+  });
+  posts
+    .remove(id)
+    .then(data => {
+      if (data) {
+        res.status(200).json("Post Deleted");
+      }
+    })
+    .catch(error => {
+      res.status(500).json({ error: "The post could not be removed" });
+    });
+});
+
+// * Update (Put) post
+
+router.put("/:id", (req, res) => {
+  const updatePost = {
+    title: req.body.title,
+    contents: req.body.contents
+  };
+  const id = req.params.id;
+
+  posts.findById(id).then(data => {
+    if (!data) {
+      return res
+        .status(404)
+        .json({ message: "The post with the specified ID does not exist." });
+    }
+
+    if (!req.body.title || !req.body.contents) {
+      return res.status(400).json({
+        errorMessage: "Please provide title and contents for the post."
+      });
+    }
+
+    posts
+      .update(id, updatePost)
+      .then(data => {
+        res.status(200).send(updatePost);
+      })
+      .catch(error => {
+        res.status(500).json({
+          error: "The post information could not be modified."
+        });
+      });
+  });
+});
+
+module.exports = router;

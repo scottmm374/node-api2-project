@@ -86,7 +86,7 @@ Configure the API to handle to the following routes:
 #### Endpoint Specifications
 
 ```
-
+__
 ```
 
 - [ ] **When the client makes a `POST` request to `/api/posts`:**
