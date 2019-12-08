@@ -50,4 +50,39 @@ router.get("/:commentsId", (req, res) => {
     });
 });
 
+//  ! Post new Comment need to finish this.
+
+router.post("/", (req, res) => {
+  const id = req.params.id;
+  const newComment = {
+    text: req.body.text,
+    post_id: req.params.id
+  };
+
+  if (!req.body.text) {
+    return res
+      .status(400)
+      .json({ message: "Please provide text for the comment." });
+  }
+  if (!id) {
+    return res
+      .status(404)
+      .json({ message: "The post with the specified ID does not exist." });
+  }
+  comments
+    .insertComment(newComment)
+    .then(data => {
+      console.log("data", data);
+
+      return res.status(201).send(newComment);
+    })
+
+    .catch(error => {
+      console.log(error, "err");
+      res.status(500).json({
+        error: "There was an error while saving the comment to the database"
+      });
+    });
+});
+
 module.exports = router;
