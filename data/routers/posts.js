@@ -3,7 +3,7 @@ const posts = require("../db.js");
 const commentsRouter = require("./comments");
 
 const router = express.Router();
-router.use("/:id/comments", commentsRouter);
+router.use("/:id", commentsRouter);
 // const router = express.Router({
 //   mergeParams: true
 // });

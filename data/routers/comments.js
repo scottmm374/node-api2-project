@@ -7,7 +7,7 @@ const router = express.Router({
 
 // Get all comments by PostId
 
-router.get("/", (req, res) => {
+router.get("/comments", (req, res) => {
   const id = req.params.id;
   comments
     .findPostComments(id)
@@ -30,7 +30,7 @@ router.get("/", (req, res) => {
 
 // Get Comment by ID
 
-router.get("/:commentsId", (req, res) => {
+router.get("/comments/:commentsId", (req, res) => {
   comments
     .findCommentById(req.params.commentsId)
     .then(data => {
@@ -52,8 +52,9 @@ router.get("/:commentsId", (req, res) => {
 
 //  ! Post new Comment need to finish this.
 
-router.post("/", (req, res) => {
+router.post("/comments", (req, res) => {
   const id = req.params.id;
+  console.log(id, "Post id");
   const newComment = {
     text: req.body.text,
     post_id: req.params.id
@@ -64,17 +65,19 @@ router.post("/", (req, res) => {
       .status(400)
       .json({ message: "Please provide text for the comment." });
   }
-  if (!id) {
-    return res
-      .status(404)
-      .json({ message: "The post with the specified ID does not exist." });
-  }
+  comments.findById(id).then(data => {
+    if (!data) {
+      return res
+        .status(404)
+        .json({ message: "The post with the specified ID does not exist." });
+    }
+  });
+
   comments
     .insertComment(newComment)
     .then(data => {
       console.log("data", data);
-
-      return res.status(201).send(newComment);
+      res.status(201).send(newComment);
     })
 
     .catch(error => {
