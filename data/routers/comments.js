@@ -48,6 +48,7 @@ router.get("/comments/:commentsId", (req, res) => {
     });
 });
 
+// Post comment to specific Post ID
 router.post("/comments", (req, res) => {
   const id = req.params.id;
   console.log(id, "Post id");
