@@ -1,5 +1,5 @@
 const express = require("express");
-const comments = require("../db.js");
+const db = require("../db.js");
 
 const router = express.Router({
   mergeParams: true
@@ -9,8 +9,7 @@ const router = express.Router({
 
 router.get("/comments", (req, res) => {
   const id = req.params.id;
-  comments
-    .findPostComments(id)
+  db.findPostComments(id)
     .then(data => {
       console.log("get by id", data);
       if (data.length <= 0) {
@@ -31,8 +30,7 @@ router.get("/comments", (req, res) => {
 // Get Comment by ID
 
 router.get("/comments/:commentsId", (req, res) => {
-  comments
-    .findCommentById(req.params.commentsId)
+  db.findCommentById(req.params.commentsId)
     .then(data => {
       console.log("get by id", data);
       if (data.length <= 0) {
@@ -50,8 +48,6 @@ router.get("/comments/:commentsId", (req, res) => {
     });
 });
 
-//  ! Post new Comment need to finish this.
-
 router.post("/comments", (req, res) => {
   const id = req.params.id;
   console.log(id, "Post id");
@@ -65,7 +61,9 @@ router.post("/comments", (req, res) => {
       .status(400)
       .json({ message: "Please provide text for the comment." });
   }
-  comments.findById(id).then(data => {
+
+  db.findById(id).then(data => {
+    console.log("data findById", data);
     if (!data) {
       return res
         .status(404)
@@ -73,8 +71,7 @@ router.post("/comments", (req, res) => {
     }
   });
 
-  comments
-    .insertComment(newComment)
+  db.insertComment(newComment)
     .then(data => {
       console.log("data", data);
       res.status(201).send(newComment);
